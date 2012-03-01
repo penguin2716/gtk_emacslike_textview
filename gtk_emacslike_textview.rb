@@ -5,16 +5,17 @@ module Gtk
   class EmacsLikeTextView < Gtk::TextView
 
 # @@hist_limit    : 履歴スタックの最大保存数
-# @@targetkey     : Ctrlで装飾してEmacsっぽいキーバインドにするキー．
+# @@control_targetkey     : Ctrlで装飾してEmacsっぽいキーバインドにするキー．
 #                   元から割り当てられていた機能は呼ばない．
-# @@unselectkey   : 選択トグルを自動的にOFFにするキー．
+# @@control_unselectkey   : 選択トグルを自動的にOFFにするキー．
 # @select         : 選択トグルのON/OFFを格納
 # @history_stack          : 履歴スタック
 
     @@hist_limit = 100
-    @@targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
+    @@control_targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
                    'e', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
-    @@unselectkey = ['g', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
+    @@control_unselectkey = ['g', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
+    @@mod1_targetkey = ['f', 'b', 'a', 'e']
 
     def initialize
       super
@@ -29,12 +30,34 @@ module Gtk
 
       # キーバインドの追加
       self.signal_connect('key_press_event') { |w, e|
-        if Gdk::Window::ModifierType::CONTROL_MASK ==
+        if Gdk::Window::ModifierType::MOD1_MASK ==
+            e.state & Gdk::Window::MOD1_MASK then
+          key = Gdk::Keyval.to_name(e.keyval)
+
+          case key
+          when 'f'
+            self.move_cursor(Gtk::MOVEMENT_WORDS, 1, @select)
+          when 'b'
+            self.move_cursor(Gtk::MOVEMENT_WORDS, -1, @select) 
+          when 'a'
+            self.move_cursor(Gtk::MOVEMENT_BUFFER_ENDS, -1, @select )
+          when 'e'
+            self.move_cursor(Gtk::MOVEMENT_BUFFER_ENDS, 1, @select )
+          end
+          
+          # Emacsっぽいキーバインドとして実行したら，もとから割り当てられていた機能は呼ばない
+          if @@mod1_targetkey.select{|k| k == key}.length > 0 then
+            true
+          else
+            false
+          end
+
+        elsif Gdk::Window::ModifierType::CONTROL_MASK ==
             e.state & Gdk::Window::CONTROL_MASK then
           key = Gdk::Keyval.to_name(e.keyval)
 
           # 選択トグルの解除
-          if @@unselectkey.select{|k| k == key}.length > 0 then
+          if @@control_unselectkey.select{|k| k == key}.length > 0 then
             @select = false
           end
 
@@ -79,14 +102,16 @@ module Gtk
           when 'slash', 'z' # undoの挙動
             self.undo
           end
+
+          # Emacsっぽいキーバインドとして実行したら，もとから割り当てられていた機能は呼ばない
+          if @@control_targetkey.select{|k| k == key}.length > 0 then
+            true
+          else
+            false
+          end
+
         end
 
-        # Emacsっぽいキーバインドとして実行したら，もとから割り当てられていた機能は呼ばない
-        if @@targetkey.select{|k| k == key}.length > 0 then
-          true
-        else
-          false
-        end
       }
     end
 
