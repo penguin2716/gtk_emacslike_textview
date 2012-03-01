@@ -4,14 +4,16 @@ require 'gtk2'
 module Gtk
   class EmacsLikeTextView < Gtk::TextView
 
-# @@hist_limit    : 履歴スタックの最大保存数
-# @@control_targetkey     : Ctrlで装飾してEmacsっぽいキーバインドにするキー．
-#                   元から割り当てられていた機能は呼ばない．
-# @@control_unselectkey   : 選択トグルを自動的にOFFにするキー．
-# @select         : 選択トグルのON/OFFを格納
-# @history_stack          : 履歴スタック
+# @@hist_limit           : 履歴スタックの最大保存数
+# @@control_targetkey    : Ctrlで装飾してEmacsっぽいキーバインドにするキー．
+#                          元から割り当てられていた機能は呼ばない．
+# @@control_unselectkey  : 選択トグルを自動的にOFFにするキー．
+# @select                : 選択トグルのON/OFFを格納
+# @history_stack         : 履歴スタック
+# @stack_ptr             : 履歴スタックポインタ
+# @isundo                : undoによる変更かどうかの確認
 
-    @@hist_limit = 100
+    @@hist_limit = 8000
     @@control_targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
                    'e', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
     @@control_unselectkey = ['g', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
@@ -23,14 +25,29 @@ module Gtk
       @select = false
       @history_stack = []
       @history_stack.push(self.buffer.text)
+      @stack_ptr = 0
+      @isundo = false
 
       # バッファが変更されたら自動的に履歴スタックに積む
       self.buffer.signal_connect('changed') {
-        self.push_buffer
+        if not @isundo then
+          @history_stack += @history_stack[@stack_ptr..-2].reverse
+          self.push_buffer
+          @stack_ptr = @history_stack.length - 1
+        end
       }
 
       # キーバインドの追加
       self.signal_connect('key_press_event') { |w, e|
+        if Gdk::Window::ModifierType::CONTROL_MASK ==
+            e.state & Gdk::Window::CONTROL_MASK and
+            Gdk::Keyval.to_name(e.keyval) == 'slash' then
+          @isundo = true
+        else
+          @isundo = false
+        end
+
+
         if Gdk::Window::ModifierType::MOD1_MASK ==
             e.state & Gdk::Window::MOD1_MASK then
           key = Gdk::Keyval.to_name(e.keyval)
@@ -138,7 +155,7 @@ module Gtk
           @history_stack.push(self.buffer.text)
         end
         if @history_stack.size > @@hist_limit then
-          @history_stack.delete(@history_stack[0])
+          @history_stack = @history_stack[1..-1]
         end
       end
     end
@@ -146,26 +163,34 @@ module Gtk
     # undoの実装．バッファの内容を変更すると自動的に履歴スタックに追加されるので，
     # 履歴スタックに追加したら最新の履歴を捨てる
     def undo
-      top = @history_stack[-1]
+      top = @history_stack[@stack_ptr]
       if top != nil then
         if top == self.buffer.text then
           # 最新履歴が現在の状態と同じなら，2番目の履歴を参照
-          @history_stack.pop
-          second = @history_stack.pop
+          decStackPtr
+          second = @history_stack[@stack_ptr]
           if second != nil then
             self.buffer.set_text(second)
-            @history_stack.pop
           else # 上から2番目が空
             self.buffer.set_text('')
-            @history_stack.pop
           end
         else
           self.buffer.set_text(top)
-          @history_stack.pop
         end
       else # 履歴スタックが空
         self.buffer.set_text('')
-        @history_stack.pop
+      end
+    end
+
+    def incStackPtr
+      if @history_stack.length > @stack_ptr + 1 then
+        @stack_ptr += 1
+      end
+    end
+
+    def decStackPtr
+      if @stack_ptr > 0 then
+        @stack_ptr -= 1
       end
     end
 
