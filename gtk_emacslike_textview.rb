@@ -15,7 +15,8 @@ module Gtk
     @@control_targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
                    'e', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
     @@control_unselectkey = ['g', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
-    @@mod1_targetkey = ['f', 'b', 'a', 'e']
+    @@mod1_targetkey = ['f', 'b', 'a', 'e', 'w']
+    @@mod1_unselectkey = ['w']
 
     def initialize
       super
@@ -34,6 +35,11 @@ module Gtk
             e.state & Gdk::Window::MOD1_MASK then
           key = Gdk::Keyval.to_name(e.keyval)
 
+          # 選択トグルの解除
+          if @@mod1_unselectkey.select{|k| k == key}.length > 0 then
+            @select = false
+          end
+
           case key
           when 'f'
             self.move_cursor(Gtk::MOVEMENT_WORDS, 1, @select)
@@ -43,6 +49,9 @@ module Gtk
             self.move_cursor(Gtk::MOVEMENT_BUFFER_ENDS, -1, @select )
           when 'e'
             self.move_cursor(Gtk::MOVEMENT_BUFFER_ENDS, 1, @select )
+          when 'w'
+            self.copy_clipboard
+            self.select_all(false)
           end
           
           # Emacsっぽいキーバインドとして実行したら，もとから割り当てられていた機能は呼ばない
