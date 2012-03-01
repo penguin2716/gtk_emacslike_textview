@@ -154,8 +154,8 @@ module Gtk
         if @history_stack[-1] != self.buffer.text then
           @history_stack.push(self.buffer.text)
         end
-        if @history_stack.size > @@hist_limit then
-          @history_stack = @history_stack[1..-1]
+        if @history_stack.length > @@hist_limit then
+          @history_stack = @history_stack[(@history_stack.length - @@hist_limit)..-1]
         end
       end
     end
