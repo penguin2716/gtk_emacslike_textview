@@ -1,41 +1,42 @@
-* ����ϲ���
-  mikutter����ƥܥå�����Emacs�äݤ������Х���ɤ��դ��ޤ���
-  ���ƤΥ��ޥ�ɤ�Emacs�˽स�Ƥ���櫓�ǤϤ���ޤ���
-  �����������ߤ����ʤ��Ȥ��Ǥ��ޤ���
+#-*- coding: utf-8 -*-
+* これは何？
+  mikutterの投稿ボックスにEmacsっぽいキーバインドを付けます．
+  全てのコマンドがEmacsに準じているわけではありません．
+  だいたい次みたいなことができます．
 
-  | ���ޥ��   | ư������                                         |
+  | コマンド   | 動作内容                                         |
   |------------+--------------------------------------------------|
-  | C-[fbnpae] | ʸ��ñ�̤Υ�������ΰ�ư                         |
-  | C-[dh]     | ʸ���κ��                                       |
-  | C-SPC      | ����Υȥ���                                     |
-  | C-[/z]     | ���                                             |
-  | C-w        | �����ΰ�Υ��å�                                 |
-  | C-k        | �����ޤǥ��å�                                   |
-  | C-y        | ����������֤�Ž���դ�                           |
-  | C-g        | ����Υȥ����OFF                                |
-  | C-A        | C-a�������򤬤ʤ��ʤä��Τ�C-A��������ˤ��Ƥߤ� |
-  | M-[fb]     | ñ��ñ�̤ǤΥ��������ư                         |
-  | M-[ae]     | �Хåե�����Ƭ/�����˰�ư                        |
-  | M-w        | �����ΰ�Υ��ԡ�                                 |
-  | M-[dh]     | ñ��ñ�̤κ��                                   |
+  | C-[fbnpae] | 文字単位のカーソルの移動                         |
+  | C-[dh]     | 文字の削除                                       |
+  | C-SPC      | 選択のトグル                                     |
+  | C-[/z]     | 戻る                                             |
+  | C-w        | 選択領域のカット                                 |
+  | C-k        | 行末までカット                                   |
+  | C-y        | カーソル位置に貼り付け                           |
+  | C-g        | 選択のトグルをOFF                                |
+  | C-A        | C-aの全選択がなくなったのでC-Aで全選択にしてみた |
+  | M-[fb]     | 単語単位でのカーソル移動                         |
+  | M-[ae]     | バッファの先頭/末尾に移動                        |
+  | M-w        | 選択領域のコピー                                 |
+  | M-[dh]     | 単語単位の削除                                   |
 
-  �ޤ��̤�mikutter����ʤ��Ƥ�Ȥ��뤫�ʡ��Ȥ��פäƤߤ��ꡥ
+  まぁ別にmikutterじゃなくても使えるかなーとか思ってみたり．
 
-** ���ư���
-  | �ե�����̾                | ����                                          |
+** 内容一覧
+  | ファイル名                | 説明                                          |
   |---------------------------+-----------------------------------------------|
-  | README.org                | ���Υե�����                                  |
-  | gtk_emacslike_textview.rb | Emacs�äݤ������Х���ɤ����ϥ��������å����� |
-  | patch.diff                | mikutter �� postbox.rb �Τ���Υѥå��ե����� |
-  | sample.rb                 | �ɤ�ʴ�����ʬ����ۥåȥ�å�                |
+  | README.org                | このファイル                                  |
+  | gtk_emacslike_textview.rb | Emacsっぽいキーバインドの入力ウィジェット本体 |
+  | patch.diff                | mikutter の postbox.rb のためのパッチファイル |
+  | sample.rb                 | どんな感じか分かるホットモック                |
 
 
-* �Ȥ����Ȥ�
-  �ե�����򥳥ԡ��Ȥ����ơ��������˥ѥå������Ƥޤ���
+* 使い方とか
+  ファイルをコピーとかして，ソースにパッチを当てます．
   
-   1. gtk_emacslike_textview.rb �� mikutter/core/mui/ �� ln -s �Ȥ�����
-   2. postbox.rb �˥ѥå��򤢤Ƥޤ�
-   3. mikutter ��Ƶ�ư���ޤ��礦
+   1. gtk_emacslike_textview.rb を mikutter/core/mui/ に ln -s とかする
+   2. postbox.rb にパッチをあてます
+   3. mikutter を再起動しましょう
 
       + $ ln -s /path/to/gtk_emacslike_textview.rb /path/to/mikutter/core/mui/
       + $ cd /path/to/mikutter/
@@ -43,14 +44,14 @@
 
 
 
-* ��Ƥ���λ���Ƥ�undo�����å����ĤäƤ�������
-  ���ͤǤ���
+* 投稿が完了してもundoスタックが残ってるんだけど
+  仕様です．
 
 
-* �Х��򸫤Ĥ��ޤ�����
-  Twitter�ˤ� @penguin2716 �ޤǥ�ץ饤�Ȥ����Ф���ĺ����Ȥ��줷���Ǥ���
+* バグを見つけました！
+  Twitterにて @penguin2716 までリプライとか飛ばして頂けるとうれしいです．
 
 
-* �����ɤ�����
-  �����ʤ�����
+* コードが汚い
+  ごめんなさい．
 
