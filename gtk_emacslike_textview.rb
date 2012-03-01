@@ -15,8 +15,8 @@ module Gtk
     @@control_targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
                    'e', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
     @@control_unselectkey = ['g', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
-    @@mod1_targetkey = ['f', 'b', 'a', 'e', 'w']
-    @@mod1_unselectkey = ['w']
+    @@mod1_targetkey = ['f', 'b', 'a', 'e', 'w', 'd', 'h']
+    @@mod1_unselectkey = ['w', 'd', 'h']
 
     def initialize
       super
@@ -49,6 +49,10 @@ module Gtk
             self.move_cursor(Gtk::MOVEMENT_BUFFER_ENDS, -1, @select )
           when 'e'
             self.move_cursor(Gtk::MOVEMENT_BUFFER_ENDS, 1, @select )
+          when 'd'
+            delete_from_cursor(Gtk::DELETE_WORD_ENDS, 1)
+          when 'h'
+            delete_from_cursor(Gtk::DELETE_WORD_ENDS, -1)
           when 'w'
             self.copy_clipboard
             self.select_all(false)
