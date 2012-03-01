@@ -27,13 +27,13 @@
   ファイルをコピーとかして，ソースにパッチを当てます．
   
    1. gtk_emacslike_textview.rb を mikutter/core/mui/ に ln -s とかする
-      ++ $ ln -s /path/to/gtk_emacslike_textview.rb /path/to/mikutter/core/mui/
-
    2. postbox.rb にパッチをあてます
-      ++ $ cd /path/to/mikutter/
-      ++ $ patch -p0 < /path/to/patch.diff
-
    3. mikutter を再起動しましょう
+
+   + $ ln -s /path/to/gtk_emacslike_textview.rb /path/to/mikutter/core/mui/
+   + $ cd /path/to/mikutter/
+   + $ patch -p0 < /path/to/patch.diff
+
 
 
 * 投稿が完了してもundoスタックが残ってるんだけど
