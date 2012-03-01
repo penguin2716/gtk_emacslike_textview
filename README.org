@@ -30,9 +30,9 @@
    2. postbox.rb にパッチをあてます
    3. mikutter を再起動しましょう
 
-   + $ ln -s /path/to/gtk_emacslike_textview.rb /path/to/mikutter/core/mui/
-   + $ cd /path/to/mikutter/
-   + $ patch -p0 < /path/to/patch.diff
+      + $ ln -s /path/to/gtk_emacslike_textview.rb /path/to/mikutter/core/mui/
+      + $ cd /path/to/mikutter/
+      + $ patch -p0 < /path/to/patch.diff
 
 
 
