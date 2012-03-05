@@ -8,6 +8,8 @@ module Gtk
 # @@control_targetkey    : Ctrlで装飾してEmacsっぽいキーバインドにするキー．
 #                          元から割り当てられていた機能は呼ばない．
 # @@control_unselectkey  : 選択トグルを自動的にOFFにするキー．
+# @@post_history         : ポスト履歴を保存するグローバルスタック
+# @@post_history_ptr     : ポスト履歴のスタックポインタ
 # @select                : 選択トグルのON/OFFを格納
 # @history_stack         : 履歴スタック
 # @stack_ptr             : 履歴スタックポインタ
@@ -17,8 +19,11 @@ module Gtk
     @@control_targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
                    'e', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
     @@control_unselectkey = ['g', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
-    @@mod1_targetkey = ['f', 'b', 'a', 'e', 'w', 'd', 'h']
-    @@mod1_unselectkey = ['w', 'd', 'h']
+    @@mod1_targetkey = ['f', 'b', 'a', 'e', 'w', 'd', 'h', 'n', 'p']
+    @@mod1_unselectkey = ['w', 'd', 'h', 'n', 'p']
+
+    @@post_history = []
+    @@post_history_ptr = 0
 
     def initialize
       super
@@ -47,7 +52,7 @@ module Gtk
           @isundo = false
         end
 
-
+        # Mod1 による装飾
         if Gdk::Window::ModifierType::MOD1_MASK ==
             e.state & Gdk::Window::MOD1_MASK then
           key = Gdk::Keyval.to_name(e.keyval)
@@ -73,6 +78,10 @@ module Gtk
           when 'w'
             self.copy_clipboard
             self.select_all(false)
+          when 'n'
+            self.redoGlobalStack
+          when 'p'
+            self.undoGlobalStack
           end
           
           # Emacsっぽいキーバインドとして実行したら，もとから割り当てられていた機能は呼ばない
@@ -82,6 +91,7 @@ module Gtk
             false
           end
 
+        # Control による装飾
         elsif Gdk::Window::ModifierType::CONTROL_MASK ==
             e.state & Gdk::Window::CONTROL_MASK then
           key = Gdk::Keyval.to_name(e.keyval)
@@ -198,6 +208,25 @@ module Gtk
     def reset
       @history_stack = []
       @select = false
+    end
+
+    def pushGlobalStack
+      @@post_history_ptr = @@post_history.length
+      @@post_history.push(self.buffer.text)
+    end
+
+    def undoGlobalStack
+      if @@post_history != []
+        self.buffer.set_text(@@post_history[@@post_history_ptr])
+        @@post_history_ptr = (@@post_history_ptr - 1) % @@post_history.length
+      end
+    end
+
+    def redoGlobalStack
+      if @@post_history != []
+        self.buffer.set_text(@@post_history[@@post_history_ptr])
+        @@post_history_ptr = (@@post_history_ptr + 1) % @@post_history.length
+      end
     end
 
   end
