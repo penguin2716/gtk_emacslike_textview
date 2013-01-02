@@ -24,6 +24,9 @@ module Gtk
 
     @@post_history = []
     @@post_history_ptr = 0
+    @@color_change_count = 140
+    @@default_basecolor = Gdk::Color.new(0xffff, 0xffff, 0xffff)
+    @@alternate_basecolor = Gdk::Color.new(0xffff, 0xbbbb, 0xbbbb)
 
     def initialize
       super
@@ -39,6 +42,12 @@ module Gtk
           @history_stack += @history_stack[@stack_ptr..-2].reverse
           self.push_buffer
           @stack_ptr = @history_stack.length - 1
+        end
+        # 文字数に応じて背景色を変更
+        if self.buffer.text.length > @@color_change_count
+          self.modify_base(Gtk::STATE_NORMAL, @@alternate_basecolor)
+        else
+          self.modify_base(Gtk::STATE_NORMAL, @@default_basecolor)
         end
       }
 
