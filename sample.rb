@@ -4,6 +4,7 @@ require 'gtk2'
 require './gtk_emacslike_textview.rb'
 
 etv = Gtk::EmacsLikeTextView.new
+etv.set_color_change_count(nil)
 
 window = Gtk::Window.new
 window.signal_connect('key_press_event') { |w, e|

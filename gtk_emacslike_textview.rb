@@ -4,16 +4,19 @@ require 'gtk2'
 module Gtk
   class EmacsLikeTextView < Gtk::TextView
 
-# @@hist_limit           : 履歴スタックの最大保存数
-# @@control_targetkey    : Ctrlで装飾してEmacsっぽいキーバインドにするキー．
-#                          元から割り当てられていた機能は呼ばない．
-# @@control_unselectkey  : 選択トグルを自動的にOFFにするキー．
-# @@post_history         : ポスト履歴を保存するグローバルスタック
-# @@post_history_ptr     : ポスト履歴のスタックポインタ
-# @select                : 選択トグルのON/OFFを格納
-# @history_stack         : 履歴スタック
-# @stack_ptr             : 履歴スタックポインタ
-# @isundo                : undoによる変更かどうかの確認
+# @@hist_limit            : 履歴スタックの最大保存数
+# @@control_targetkey     : Ctrlで装飾してEmacsっぽいキーバインドにするキー．
+#                           元から割り当てられていた機能は呼ばない．
+# @@control_unselectkey   : 選択トグルを自動的にOFFにするキー
+# @@post_history          : ポスト履歴を保存するグローバルスタック
+# @@post_history_ptr      : ポスト履歴のスタックポインタ
+# @@color_change_count    : 背景色を変更する文字数の閾値．nilに設定すると背景色を変更しない
+# @@default_basecolor     : デフォルトの背景色
+# @@alternative_basecolor : 文字数が閾値を上回った場合に設定する背景色
+# @select                 : 選択トグルのON/OFFを格納
+# @history_stack          : 履歴スタック
+# @stack_ptr              : 履歴スタックポインタ
+# @isundo                 : undoによる変更かどうかの確認
 
     @@hist_limit = 8000
     @@control_targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
@@ -44,10 +47,12 @@ module Gtk
           @stack_ptr = @history_stack.length - 1
         end
         # 文字数に応じて背景色を変更
-        if self.buffer.text.length > @@color_change_count
-          self.modify_base(Gtk::STATE_NORMAL, @@alternate_basecolor)
-        else
-          self.modify_base(Gtk::STATE_NORMAL, @@default_basecolor)
+        if @@color_change_count != nil
+          if self.buffer.text.length > @@color_change_count
+            self.modify_base(Gtk::STATE_NORMAL, @@alternate_basecolor)
+          else
+            self.modify_base(Gtk::STATE_NORMAL, @@default_basecolor)
+          end
         end
       }
 
@@ -162,6 +167,18 @@ module Gtk
         end
 
       }
+    end
+
+    def set_color_change_count(count)
+      @@color_change_count = count
+    end
+
+    def set_default_basecolor(color)
+      @@default_basecolor = color
+    end
+
+    def set_alternative_basecolor(color)
+      @@alternate_basecolor = color
     end
 
     # 現在のバッファと最新の履歴が異なっていればスタックに現在の状態を追加
