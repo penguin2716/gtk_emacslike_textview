@@ -1,5 +1,12 @@
 #!/usr/bin/env ruby
 #-*- coding: utf-8 -*-
+
+# dummy class
+class Plugin
+  def self.create(args)
+  end
+end
+
 require 'gtk2'
 require './gtk_emacslike_textview.rb'
 
