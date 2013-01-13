@@ -31,6 +31,10 @@ module Gtk
     @@default_basecolor = Gdk::Color.new(0xffff, 0xffff, 0xffff)
     @@alternate_basecolor = Gdk::Color.new(0xffff, 0xbbbb, 0xbbbb)
 
+    def self.pushGlobalStack(text)
+      @@post_history_ptr = @@post_history.length
+      @@post_history.push(text) end
+
     def initialize
       super
       @select = false
@@ -236,11 +240,6 @@ module Gtk
       @select = false
     end
 
-    def pushGlobalStack
-      @@post_history_ptr = @@post_history.length
-      @@post_history.push(self.buffer.text)
-    end
-
     def undoGlobalStack
       if @@post_history != []
         self.buffer.set_text(@@post_history[@@post_history_ptr])
@@ -257,3 +256,12 @@ module Gtk
 
   end
 end
+
+class Gtk::PostBox
+  def gen_widget_post
+    Gtk::EmacsLikeTextView.new end end
+
+Plugin.create :gtk_emacslike_textview do
+  on_before_postbox_post do |text|
+    Gtk::EmacsLikeTextView.pushGlobalStack(text) end end
+

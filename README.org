@@ -28,22 +28,11 @@
   |---------------------------+-----------------------------------------------|
   | README.org                | このファイル                                  |
   | gtk_emacslike_textview.rb | Emacsっぽいキーバインドの入力ウィジェット本体 |
-  | patch.diff                | mikutter の postbox.rb のためのパッチファイル |
   | sample.rb                 | どんな感じか分かるホットモック                |
 
 
 * 使い方とか
-  ファイルをコピーとかして，ソースにパッチを当てます．
-  
-   1. gtk_emacslike_textview.rb を mikutter/core/mui/ に ln -s とかする
-   2. postbox.rb にパッチをあてます
-   3. mikutter を再起動しましょう
-
-      + $ ln -s /path/to/gtk_emacslike_textview.rb /path/to/mikutter/core/mui/
-      + $ cd /path/to/mikutter/
-      + $ patch -p0 < /path/to/patch.diff
-
-
+  置けばおk
 
 * 投稿が完了してもundoスタックが残ってるんだけど
   仕様です．
@@ -55,4 +44,3 @@
 
 * コードが汚い
   ごめんなさい．
-
