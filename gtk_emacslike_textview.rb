@@ -1,8 +1,9 @@
 #-*- coding: utf-8 -*-
 require 'gtk2'
+require 'gtksourceview2'
 
 module Gtk
-  class EmacsLikeTextView < Gtk::TextView
+  class EmacsLikeTextView < Gtk::SourceView
 
 # @@hist_limit            : 履歴スタックの最大保存数
 # @@control_targetkey     : Ctrlで装飾してEmacsっぽいキーバインドにするキー．
@@ -22,8 +23,8 @@ module Gtk
     @@control_targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
                    'e', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
     @@control_unselectkey = ['g', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
-    @@mod1_targetkey = ['f', 'b', 'a', 'e', 'w', 'd', 'h', 'n', 'p']
-    @@mod1_unselectkey = ['w', 'd', 'h', 'n', 'p']
+    @@mod1_targetkey = ['f', 'b', 'a', 'e', 'w', 'd', 'h', 'n', 'p', 'Return']
+    @@mod1_unselectkey = ['w', 'd', 'h', 'n', 'p', 'Return']
 
     @@post_history = []
     @@post_history_ptr = 0
@@ -35,6 +36,22 @@ module Gtk
       @@post_history_ptr = @@post_history.length
       @@post_history.push(text) end
 
+    # ハイライトする言語の変更
+    def update_language(lang)
+      buffer = Gtk::SourceBuffer.new
+      lang_manager = Gtk::SourceLanguageManager.new
+      language = lang_manager.get_language(lang)
+      if language != nil
+        self.auto_indent = true
+        self.highlight_current_line = true
+      else
+        self.auto_indent = false
+        self.highlight_current_line = false
+      end
+      buffer.language = language
+      self.buffer = buffer
+    end
+
     def initialize
       super
       @select = false
@@ -42,6 +59,10 @@ module Gtk
       @history_stack.push(self.buffer.text)
       @stack_ptr = 0
       @isundo = false
+
+      # 行数を表示，言語は未設定
+      self.show_line_numbers = true
+      update_language('')
 
       # バッファが変更されたら自動的に履歴スタックに積む
       self.buffer.signal_connect('changed') {
@@ -70,8 +91,21 @@ module Gtk
           @isundo = false
         end
 
+        # Tabフォーカスをフック
+        if Gdk::Window::ModifierType::SHIFT_MASK ==
+            e.state & Gdk::Window::SHIFT_MASK and
+            Gdk::Keyval.to_name(e.keyval) == 'ISO_Left_Tab'
+          @select = false
+          move_focus(Gtk::DIR_TAB_BACKWARD)
+          true
+
+        elsif Gdk::Keyval.to_name(e.keyval) == 'Tab'
+          @select = false
+          move_focus(Gtk::DIR_TAB_FORWARD)
+          true
+
         # Mod1 による装飾
-        if Gdk::Window::ModifierType::MOD1_MASK ==
+        elsif Gdk::Window::ModifierType::MOD1_MASK ==
             e.state & Gdk::Window::MOD1_MASK then
           key = Gdk::Keyval.to_name(e.keyval)
 
@@ -100,6 +134,11 @@ module Gtk
             self.redoGlobalStack
           when 'p'
             self.undoGlobalStack
+          when 'Return'
+            if self.buffer.text =~ /^@@[a-z]+$/
+              lang = self.buffer.text.sub(/^@@/,'')
+              update_language(lang)
+            end
           end
           
           # Emacsっぽいキーバインドとして実行したら，もとから割り当てられていた機能は呼ばない
