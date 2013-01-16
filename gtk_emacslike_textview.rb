@@ -279,14 +279,14 @@ module Gtk
       @select = false
     end
 
-    def undoGlobalStack
+    def self.undoGlobalStack
       if @@post_history != []
         self.buffer.set_text(@@post_history[@@post_history_ptr])
         @@post_history_ptr = (@@post_history_ptr - 1) % @@post_history.length
       end
     end
 
-    def redoGlobalStack
+    def self.redoGlobalStack
       if @@post_history != []
         self.buffer.set_text(@@post_history[@@post_history_ptr])
         @@post_history_ptr = (@@post_history_ptr + 1) % @@post_history.length
