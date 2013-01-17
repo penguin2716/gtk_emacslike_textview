@@ -11,9 +11,9 @@ module Gtk
 # @@control_unselectkey   : 選択トグルを自動的にOFFにするキー
 # @@post_history          : ポスト履歴を保存するグローバルスタック
 # @@post_history_ptr      : ポスト履歴のスタックポインタ
-# @@color_change_count    : 背景色を変更する文字数の閾値．nilに設定すると背景色を変更しない
 # @@default_basecolor     : デフォルトの背景色
 # @@alternative_basecolor : 文字数が閾値を上回った場合に設定する背景色
+# @color_change_count     : 背景色を変更する文字数の閾値．nilに設定すると背景色を変更しない
 # @select                 : 選択トグルのON/OFFを格納
 # @history_stack          : 履歴スタック
 # @stack_ptr              : 履歴スタックポインタ
