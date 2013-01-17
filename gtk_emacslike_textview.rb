@@ -28,7 +28,6 @@ module Gtk
 
     @@post_history = []
     @@post_history_ptr = 0
-    @@color_change_count = 140
     @@default_basecolor = Gdk::Color.new(0xffff, 0xffff, 0xffff)
     @@alternate_basecolor = Gdk::Color.new(0xffff, 0xbbbb, 0xbbbb)
 
@@ -47,8 +46,8 @@ module Gtk
           @stack_ptr = @history_stack.length - 1
         end
         # 文字数に応じて背景色を変更
-        if @@color_change_count != nil
-          if self.buffer.text.length > @@color_change_count
+        if get_color_change_count != nil
+          if self.buffer.text.length > get_color_change_count
             self.modify_base(Gtk::STATE_NORMAL, @@alternate_basecolor)
           else
             self.modify_base(Gtk::STATE_NORMAL, @@default_basecolor)
@@ -59,11 +58,11 @@ module Gtk
       lang_manager = Gtk::SourceLanguageManager.new
       language = lang_manager.get_language(lang)
       if language != nil
-        @@color_change_count = nil
+        set_color_change_count(nil)
         self.auto_indent = true
         self.highlight_current_line = true
       else
-        @@color_change_count = 140
+        set_color_change_count(140)
         self.auto_indent = false
         self.highlight_current_line = false
       end
@@ -91,8 +90,8 @@ module Gtk
           @stack_ptr = @history_stack.length - 1
         end
         # 文字数に応じて背景色を変更
-        if @@color_change_count != nil
-          if self.buffer.text.length > @@color_change_count
+        if get_color_change_count != nil
+          if self.buffer.text.length > get_color_change_count
             self.modify_base(Gtk::STATE_NORMAL, @@alternate_basecolor)
           else
             self.modify_base(Gtk::STATE_NORMAL, @@default_basecolor)
@@ -232,7 +231,11 @@ module Gtk
     end
 
     def set_color_change_count(count)
-      @@color_change_count = count
+      @color_change_count = count
+    end
+
+    def get_color_change_count
+      @color_change_count
     end
 
     def set_default_basecolor(color)
