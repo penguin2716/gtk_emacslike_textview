@@ -70,6 +70,20 @@ module Gtk
       self.buffer = buffer
     end
 
+    def load_snippets
+      @snippets = []
+      load_path = ['../plugin', '~/.mikutter/plugin']
+      load_path.each { |path|
+        snippets = `find #{path} | grep snippets/`.split("\n")
+        snippets.select!{ |candidate| File.file?(candidate) }
+        snippets.each { |snippet|
+          f = open(snippet, "r")
+          @snippets << [File.basename(snippet), f.read.sub(/[\n]+$/,'')]
+          f.close
+        }
+      }
+    end
+
     def initialize
       super
       @select = false
@@ -81,6 +95,7 @@ module Gtk
       # 行数を表示，言語は未設定
       self.show_line_numbers = true
       update_language('')
+      self.load_snippets
 
       # バッファが変更されたら自動的に履歴スタックに積む
       self.buffer.signal_connect('changed') {
@@ -119,7 +134,35 @@ module Gtk
 
         elsif Gdk::Keyval.to_name(e.keyval) == 'Tab'
           @select = false
-          move_focus(Gtk::DIR_TAB_FORWARD)
+
+          complete = false
+          @snippets.each do |pattern, completion|
+            index = self.buffer.text.index(pattern)
+            while index
+              lastindex = index
+              if index + pattern.size == self.buffer.cursor_position
+                self.delete_from_cursor(Gtk::DELETE_CHARS, -1 * pattern.size)
+                auto_pos = completion.index('$0')
+                if auto_pos
+                  completion.sub!('$0', '')
+                  self.buffer.insert_at_cursor(completion)
+                  self.move_cursor(Gtk::MOVEMENT_VISUAL_POSITIONS, -1 * completion[auto_pos..-1].size, @select)
+                  
+                else
+                  self.buffer.insert_at_cursor(completion)
+                end
+                complete = true
+                break
+              else
+                index = self.buffer.text.index(pattern, lastindex + 1)
+              end
+            end
+          end
+
+
+          unless complete
+            move_focus(Gtk::DIR_TAB_FORWARD)
+          end
           true
 
         # Mod1 による装飾

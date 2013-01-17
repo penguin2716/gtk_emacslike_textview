@@ -1,0 +1,1 @@
+Plugin.call(:update, nil, [Message.new(:message => "$0", :system => true)])
