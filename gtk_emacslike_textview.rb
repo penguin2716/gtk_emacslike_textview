@@ -59,9 +59,11 @@ module Gtk
       lang_manager = Gtk::SourceLanguageManager.new
       language = lang_manager.get_language(lang)
       if language != nil
+        @@color_change_count = nil
         self.auto_indent = true
         self.highlight_current_line = true
       else
+        @@color_change_count = 140
         self.auto_indent = false
         self.highlight_current_line = false
       end
