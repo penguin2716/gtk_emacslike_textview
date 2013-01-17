@@ -131,9 +131,9 @@ module Gtk
             self.copy_clipboard
             self.select_all(false)
           when 'n'
-            self.redoGlobalStack
+            redoGlobalStack
           when 'p'
-            self.undoGlobalStack
+            undoGlobalStack
           when 'Return'
             if self.buffer.text =~ /^@@[a-z]+$/
               lang = self.buffer.text.sub(/^@@/,'')
@@ -279,14 +279,14 @@ module Gtk
       @select = false
     end
 
-    def self.undoGlobalStack
+    def undoGlobalStack
       if @@post_history != []
         self.buffer.set_text(@@post_history[@@post_history_ptr])
         @@post_history_ptr = (@@post_history_ptr - 1) % @@post_history.length
       end
     end
 
-    def self.redoGlobalStack
+    def redoGlobalStack
       if @@post_history != []
         self.buffer.set_text(@@post_history[@@post_history_ptr])
         @@post_history_ptr = (@@post_history_ptr + 1) % @@post_history.length
