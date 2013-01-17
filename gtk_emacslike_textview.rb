@@ -39,6 +39,23 @@ module Gtk
     # ハイライトする言語の変更
     def update_language(lang)
       buffer = Gtk::SourceBuffer.new
+
+      buffer.signal_connect('changed') {
+        if not @isundo then
+          @history_stack += @history_stack[@stack_ptr..-2].reverse
+          self.push_buffer
+          @stack_ptr = @history_stack.length - 1
+        end
+        # 文字数に応じて背景色を変更
+        if @@color_change_count != nil
+          if self.buffer.text.length > @@color_change_count
+            self.modify_base(Gtk::STATE_NORMAL, @@alternate_basecolor)
+          else
+            self.modify_base(Gtk::STATE_NORMAL, @@default_basecolor)
+          end
+        end
+      }
+
       lang_manager = Gtk::SourceLanguageManager.new
       language = lang_manager.get_language(lang)
       if language != nil
