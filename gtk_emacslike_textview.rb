@@ -161,10 +161,7 @@ module Gtk
 
         elsif Gdk::Keyval.to_name(e.keyval) == 'Tab'
           @select = false
-
-          unless expand_snippet
-            move_focus(Gtk::DIR_TAB_FORWARD)
-          end
+          move_focus(Gtk::DIR_TAB_FORWARD)
           true
 
         # Mod1 による装飾
