@@ -70,7 +70,8 @@ module Gtk
       self.buffer = buffer
     end
 
-    def load_snippets
+    def get_snippets
+      return @snippets if defined?(@snippets)
       @snippets = []
       load_path = ['../plugin', '~/.mikutter/plugin']
       load_path.each { |path|
@@ -82,11 +83,12 @@ module Gtk
           f.close
         }
       }
+      @snippets
     end
 
     def expand_snippet
       complete = false
-      @snippets.each do |pattern, completion|
+      get_snippets.each do |pattern, completion|
         index = self.buffer.text.index(pattern)
         while index
           lastindex = index
@@ -122,7 +124,6 @@ module Gtk
       # 行数を表示，言語は未設定
       self.show_line_numbers = true
       update_language('')
-      self.load_snippets
 
       # バッファが変更されたら自動的に履歴スタックに積む
       self.buffer.signal_connect('changed') {
