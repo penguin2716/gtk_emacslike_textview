@@ -84,6 +84,33 @@ module Gtk
       }
     end
 
+    def expand_snippet
+      complete = false
+      @snippets.each do |pattern, completion|
+        index = self.buffer.text.index(pattern)
+        while index
+          lastindex = index
+          if index + pattern.size == self.buffer.cursor_position
+            self.delete_from_cursor(Gtk::DELETE_CHARS, -1 * pattern.size)
+            auto_pos = completion.index('$0')
+            if auto_pos
+              completion.sub!('$0', '')
+              self.buffer.insert_at_cursor(completion)
+              self.move_cursor(Gtk::MOVEMENT_VISUAL_POSITIONS, -1 * completion[auto_pos..-1].size, @select)
+              
+            else
+              self.buffer.insert_at_cursor(completion)
+            end
+            complete = true
+            break
+          else
+            index = self.buffer.text.index(pattern, lastindex + 1)
+          end
+        end
+      end
+      complete
+    end
+
     def initialize
       super
       @select = false
@@ -135,32 +162,7 @@ module Gtk
         elsif Gdk::Keyval.to_name(e.keyval) == 'Tab'
           @select = false
 
-          complete = false
-          @snippets.each do |pattern, completion|
-            index = self.buffer.text.index(pattern)
-            while index
-              lastindex = index
-              if index + pattern.size == self.buffer.cursor_position
-                self.delete_from_cursor(Gtk::DELETE_CHARS, -1 * pattern.size)
-                auto_pos = completion.index('$0')
-                if auto_pos
-                  completion.sub!('$0', '')
-                  self.buffer.insert_at_cursor(completion)
-                  self.move_cursor(Gtk::MOVEMENT_VISUAL_POSITIONS, -1 * completion[auto_pos..-1].size, @select)
-                  
-                else
-                  self.buffer.insert_at_cursor(completion)
-                end
-                complete = true
-                break
-              else
-                index = self.buffer.text.index(pattern, lastindex + 1)
-              end
-            end
-          end
-
-
-          unless complete
+          unless expand_snippet
             move_focus(Gtk::DIR_TAB_FORWARD)
           end
           true
