@@ -161,7 +161,15 @@ module Gtk
 
         elsif Gdk::Keyval.to_name(e.keyval) == 'Tab'
           @select = false
-          move_focus(Gtk::DIR_TAB_FORWARD)
+          if UserConfig[:shortcutkey_keybinds].select{ |key, bind|
+              bind[:slug] == :expand_snippet and bind[:key] == 'Tab'
+            } != {}
+            unless expand_snippet
+              move_focus(Gtk::DIR_TAB_FORWARD)
+            end
+          else
+            move_focus(Gtk::DIR_TAB_FORWARD)
+          end
           true
 
         # Mod1 による装飾
