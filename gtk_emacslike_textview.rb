@@ -156,7 +156,15 @@ module Gtk
             e.state & Gdk::Window::SHIFT_MASK and
             Gdk::Keyval.to_name(e.keyval) == 'ISO_Left_Tab'
           @select = false
-          move_focus(Gtk::DIR_TAB_BACKWARD)
+          if UserConfig[:shortcutkey_keybinds].select{ |key, bind|
+              bind[:slug] == :expand_snippet and bind[:key] == 'Shift + ISO_Left_Tab'
+            } != {}
+            unless expand_snippet
+              move_focus(Gtk::DIR_TAB_BACKWARD)
+            end
+          else
+            move_focus(Gtk::DIR_TAB_BACKWARD)
+          end
           true
 
         elsif Gdk::Keyval.to_name(e.keyval) == 'Tab'
