@@ -11,8 +11,10 @@ module Gtk
 # @@control_unselectkey   : 選択トグルを自動的にOFFにするキー
 # @@post_history          : ポスト履歴を保存するグローバルスタック
 # @@post_history_ptr      : ポスト履歴のスタックポインタ
-# @@default_basecolor     : デフォルトの背景色
-# @@alternative_basecolor : 文字数が閾値を上回った場合に設定する背景色
+# @default_basecolor      : デフォルトの背景色
+# @default_fgcolor        : デフォルトの文字色
+# @alternate_basecolor    : 文字数が閾値を上回った場合に設定する背景色
+# @alternate_fgcolor      : 文字数が閾値を上回った場合に設定する文字色
 # @color_change_count     : 背景色を変更する文字数の閾値．nilに設定すると背景色を変更しない
 # @select                 : 選択トグルのON/OFFを格納
 # @history_stack          : 履歴スタック
@@ -28,8 +30,6 @@ module Gtk
 
     @@post_history = []
     @@post_history_ptr = 0
-    @@default_basecolor = Gdk::Color.new(0xffff, 0xffff, 0xffff)
-    @@alternate_basecolor = Gdk::Color.new(0xffff, 0xbbbb, 0xbbbb)
 
     def self.pushGlobalStack(text)
       @@post_history_ptr = @@post_history.length
@@ -45,12 +45,17 @@ module Gtk
           self.push_buffer
           @stack_ptr = @history_stack.length - 1
         end
-        # 文字数に応じて背景色を変更
-        if get_color_change_count != nil
-          if self.buffer.text.length > get_color_change_count
-            self.modify_base(Gtk::STATE_NORMAL, @@alternate_basecolor)
-          else
-            self.modify_base(Gtk::STATE_NORMAL, @@default_basecolor)
+
+        if UserConfig[:etv_change_background_color]
+          # 文字数に応じて背景色を変更
+          if get_color_change_count != nil
+            if self.buffer.text.length > get_color_change_count
+              self.modify_base(Gtk::STATE_NORMAL, self.alternate_basecolor)
+              self.modify_text(Gtk::STATE_NORMAL, self.alternate_fgcolor)
+            else
+              self.modify_base(Gtk::STATE_NORMAL, self.default_basecolor)
+              self.modify_text(Gtk::STATE_NORMAL, self.default_fgcolor)
+            end
           end
         end
       }
@@ -139,12 +144,17 @@ module Gtk
           self.push_buffer
           @stack_ptr = @history_stack.length - 1
         end
+
+        if UserConfig[:etv_change_background_color]
         # 文字数に応じて背景色を変更
-        if get_color_change_count != nil
-          if self.buffer.text.length > get_color_change_count
-            self.modify_base(Gtk::STATE_NORMAL, @@alternate_basecolor)
-          else
-            self.modify_base(Gtk::STATE_NORMAL, @@default_basecolor)
+          if get_color_change_count != nil
+            if self.buffer.text.length > get_color_change_count
+              self.modify_base(Gtk::STATE_NORMAL, self.alternate_basecolor)
+              self.modify_text(Gtk::STATE_NORMAL, self.alternate_fgcolor)
+            else
+              self.modify_base(Gtk::STATE_NORMAL, self.default_basecolor)
+              self.modify_text(Gtk::STATE_NORMAL, self.default_fgcolor)
+            end
           end
         end
       }
@@ -299,12 +309,28 @@ module Gtk
       @color_change_count
     end
 
-    def set_default_basecolor(color)
-      @@default_basecolor = color
+    def default_basecolor
+      color = UserConfig[:etv_default_background_color]
+      @default_basecolor = Gdk::Color.new(color[0], color[1], color[2])
+      @default_basecolor
     end
 
-    def set_alternative_basecolor(color)
-      @@alternate_basecolor = color
+    def alternate_basecolor
+      color = UserConfig[:etv_alternate_background_color]
+      @alternate_basecolor = Gdk::Color.new(color[0], color[1], color[2])
+      @alternate_basecolor
+    end
+
+    def default_fgcolor
+      color = UserConfig[:etv_default_foreground_color]
+      @default_fgcolor = Gdk::Color.new(color[0], color[1], color[2])
+      @default_fgcolor
+    end
+
+    def alternate_fgcolor
+      color = UserConfig[:etv_alternate_foreground_color]
+      @alternate_fgcolor = Gdk::Color.new(color[0], color[1], color[2])
+      @alternate_fgcolor
     end
 
     # 現在のバッファと最新の履歴が異なっていればスタックに現在の状態を追加
