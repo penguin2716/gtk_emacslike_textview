@@ -23,8 +23,8 @@ module Gtk
     @@control_targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
                    'e', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
     @@control_unselectkey = ['g', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
-    @@mod1_targetkey = ['f', 'b', 'a', 'e', 'w', 'd', 'h', 'n', 'p', 'Return']
-    @@mod1_unselectkey = ['w', 'd', 'h', 'n', 'p', 'Return']
+    @@mod1_targetkey = ['f', 'b', 'a', 'e', 'w', 'd', 'h', 'n', 'p']
+    @@mod1_unselectkey = ['w', 'd', 'h', 'n', 'p']
 
     @@post_history = []
     @@post_history_ptr = 0
@@ -68,6 +68,13 @@ module Gtk
       end
       buffer.language = language
       self.buffer = buffer
+    end
+
+    def update_language_post
+      if self.buffer.text =~ /^@@[a-z]+$/
+        lang = self.buffer.text.sub(/^@@/,'')
+        update_language(lang)
+      end
     end
 
     def get_snippets
@@ -211,11 +218,6 @@ module Gtk
             redoGlobalStack
           when 'p'
             undoGlobalStack
-          when 'Return'
-            if self.buffer.text =~ /^@@[a-z]+$/
-              lang = self.buffer.text.sub(/^@@/,'')
-              update_language(lang)
-            end
           end
           
           # Emacsっぽいキーバインドとして実行したら，もとから割り当てられていた機能は呼ばない
@@ -392,6 +394,14 @@ Plugin.create :gtk_emacslike_textview do
           visible: true,
           role: :postbox) do |opt|
     Plugin.create(:gtk).widgetof(opt.widget).widget_post.expand_snippet
+  end
+
+  command(:update_language,
+          name: 'ハイライトする言語を変更',
+          condition: lambda{ |opt| true },
+          visible: true,
+          role: :postbox) do |opt|
+    Plugin.create(:gtk).widgetof(opt.widget).widget_post.update_language_post
   end
 
 end
