@@ -7,6 +7,8 @@ class Plugin
   end
 end
 
+UserConfig = {}
+
 require 'gtk2'
 require './gtk_emacslike_textview.rb'
 
