@@ -133,7 +133,7 @@ module Gtk
       super
       @select = false
       @history_stack = []
-      @history_stack.push(self.buffer.text)
+      @history_stack.push([self.buffer.text, self.buffer.cursor_position])
       @stack_ptr = 0
       @isundo = false
 
@@ -321,11 +321,11 @@ module Gtk
     # 現在のバッファと最新の履歴が異なっていればスタックに現在の状態を追加
     def push_buffer
       if @history_stack == nil then
-        @history_stack = ['']
+        @history_stack = [['', 0]]
       end
       if self.buffer.text != '' then
-        if @history_stack[-1] != self.buffer.text then
-          @history_stack.push(self.buffer.text)
+        if @history_stack[-1][0] != self.buffer.text then
+          @history_stack.push([self.buffer.text, self.buffer.cursor_position])
         end
         if @history_stack.length > @@hist_limit then
           @history_stack = @history_stack[(@history_stack.length - @@hist_limit)..-1]
@@ -338,17 +338,19 @@ module Gtk
     def undo
       top = @history_stack[@stack_ptr]
       if top != nil then
-        if top == self.buffer.text then
+        if top[0] == self.buffer.text then
           # 最新履歴が現在の状態と同じなら，2番目の履歴を参照
           decStackPtr
           second = @history_stack[@stack_ptr]
           if second != nil then
-            self.buffer.set_text(second)
+            self.buffer.set_text(second[0])
+            self.buffer.place_cursor(self.buffer.get_iter_at_offset(second[1]))
           else # 上から2番目が空
             self.buffer.set_text('')
           end
         else
-          self.buffer.set_text(top)
+          self.buffer.set_text(top[0])
+          self.buffer.place_cursor(self.buffer.get_iter_at_offset(top[1]))
         end
       else # 履歴スタックが空
         self.buffer.set_text('')
