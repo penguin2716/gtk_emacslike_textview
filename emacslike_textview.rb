@@ -35,10 +35,8 @@ module Gtk
       @@post_history_ptr = @@post_history.length
       @@post_history.push(text) end
 
-    # ハイライトする言語の変更
-    def update_language(lang)
-      buffer = Gtk::SourceBuffer.new
 
+    def add_signal(buffer)
       buffer.signal_connect('changed') {
         if not @isundo then
           @history_stack += @history_stack[@stack_ptr..-2].reverse
@@ -47,7 +45,7 @@ module Gtk
         end
 
         if UserConfig[:etv_change_background_color]
-          # 文字数に応じて背景色を変更
+        # 文字数に応じて背景色を変更
           if get_color_change_count != nil
             if self.buffer.text.length > get_color_change_count
               self.modify_base(Gtk::STATE_NORMAL, self.alternate_basecolor)
@@ -59,6 +57,12 @@ module Gtk
           end
         end
       }
+      buffer
+    end
+
+    # ハイライトする言語の変更
+    def update_language(lang)
+      buffer = add_signal(Gtk::SourceBuffer.new)
 
       lang_manager = Gtk::SourceLanguageManager.new
       language = lang_manager.get_language(lang)
@@ -138,26 +142,7 @@ module Gtk
       update_language('')
 
       # バッファが変更されたら自動的に履歴スタックに積む
-      self.buffer.signal_connect('changed') {
-        if not @isundo then
-          @history_stack += @history_stack[@stack_ptr..-2].reverse
-          self.push_buffer
-          @stack_ptr = @history_stack.length - 1
-        end
-
-        if UserConfig[:etv_change_background_color]
-        # 文字数に応じて背景色を変更
-          if get_color_change_count != nil
-            if self.buffer.text.length > get_color_change_count
-              self.modify_base(Gtk::STATE_NORMAL, self.alternate_basecolor)
-              self.modify_text(Gtk::STATE_NORMAL, self.alternate_fgcolor)
-            else
-              self.modify_base(Gtk::STATE_NORMAL, self.default_basecolor)
-              self.modify_text(Gtk::STATE_NORMAL, self.default_fgcolor)
-            end
-          end
-        end
-      }
+      add_signal(self.buffer)
 
       # キーバインドの追加
       self.signal_connect('key_press_event') { |w, e|
