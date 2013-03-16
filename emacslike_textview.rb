@@ -20,6 +20,7 @@ module Gtk
 # @history_stack          : 履歴スタック
 # @stack_ptr              : 履歴スタックポインタ
 # @isundo                 : undoによる変更かどうかの確認
+# @is_global_undo         : ポスト履歴を遡るときにundoとredoを識別
 
     @@hist_limit = 8000
     @@control_targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
@@ -377,15 +378,31 @@ module Gtk
 
     def undoGlobalStack
       if @@post_history != []
+        if not defined? @is_global_undo
+          @is_global_undo = true
+        end
+        if @is_global_undo == false
+          @@post_history_ptr = (@@post_history_ptr - 1) % @@post_history.length
+          @@post_history_ptr = (@@post_history_ptr - 1) % @@post_history.length
+        end
         self.buffer.set_text(@@post_history[@@post_history_ptr])
         @@post_history_ptr = (@@post_history_ptr - 1) % @@post_history.length
+        @is_global_undo = true
       end
     end
 
     def redoGlobalStack
       if @@post_history != []
+        if not defined? @is_global_undo
+          @is_global_undo = false
+        end
+        if @is_global_undo == true
+          @@post_history_ptr = (@@post_history_ptr + 1) % @@post_history.length
+          @@post_history_ptr = (@@post_history_ptr + 1) % @@post_history.length
+        end
         self.buffer.set_text(@@post_history[@@post_history_ptr])
         @@post_history_ptr = (@@post_history_ptr + 1) % @@post_history.length
+        @is_global_undo = false
       end
     end
 
