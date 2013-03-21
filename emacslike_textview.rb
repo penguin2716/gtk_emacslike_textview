@@ -145,6 +145,13 @@ module Gtk
       # バッファが変更されたら自動的に履歴スタックに積む
       add_signal(self.buffer)
 
+      # 右クリックメニューの追加
+      self.signal_connect('button_press_event') { |widget, event|
+        if event.kind_of? Gdk::EventButton and event.button == 3
+          Plugin::GUI::Command.menu_pop
+        end
+      }
+
       # キーバインドの追加
       self.signal_connect('key_press_event') { |w, e|
         if Gdk::Window::ModifierType::CONTROL_MASK ==
