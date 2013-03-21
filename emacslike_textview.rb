@@ -113,9 +113,9 @@ module Gtk
             self.delete_from_cursor(Gtk::DELETE_CHARS, -1 * pattern.size)
             auto_pos = completion.index('$0')
             if auto_pos
-              completion.sub!('$0', '')
-              self.buffer.insert_at_cursor(completion)
-              self.move_cursor(Gtk::MOVEMENT_VISUAL_POSITIONS, -1 * completion[auto_pos..-1].size, @select)
+              insert_text = completion.sub('$0', '')
+              self.buffer.insert_at_cursor(insert_text)
+              self.move_cursor(Gtk::MOVEMENT_VISUAL_POSITIONS, -1 * insert_text[auto_pos..-1].size, @select)
               
             else
               self.buffer.insert_at_cursor(completion)
