@@ -24,8 +24,8 @@ module Gtk
 
     @@hist_limit = 8000
     @@control_targetkey = ['A', 'space', 'g', 'f', 'b', 'n', 'p', 'a',
-                   'e', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
-    @@control_unselectkey = ['g', 'd', 'h', 'w', 'k', 'y', 'slash', 'z']
+                   'e', 'd', 'h', 'w', 'k', 'y', 't', 'slash', 'z']
+    @@control_unselectkey = ['g', 'd', 'h', 'w', 'k', 'y', 't', 'slash', 'z']
     @@mod1_targetkey = ['f', 'b', 'a', 'e', 'w', 'd', 'h', 'n', 'p']
     @@mod1_unselectkey = ['w', 'd', 'h', 'n', 'p']
 
@@ -278,6 +278,17 @@ module Gtk
             end
           when 'y' # 現在位置に貼り付け
             self.paste_clipboard
+          when 't'
+            self.move_cursor(Gtk::MOVEMENT_VISUAL_POSITIONS, -1, false) if self.buffer.cursor_position == self.buffer.text.size
+            offset = self.buffer.cursor_position
+            start_iter = self.buffer.get_iter_at_offset(offset-1)
+            end_iter = self.buffer.get_iter_at_offset(offset)
+            transpose_char = self.buffer.get_text(start_iter, end_iter)
+            @isundo = true
+            self.buffer.delete(start_iter, end_iter)
+            @isundo = false
+            self.move_cursor(Gtk::MOVEMENT_VISUAL_POSITIONS, 1, false)
+            self.buffer.insert_at_cursor(transpose_char)
           when 'slash', 'z' # undoの挙動
             self.undo
           end
